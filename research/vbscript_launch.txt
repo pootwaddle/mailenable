@@ -1,0 +1,32 @@
+
+
+
+Set objShell = CreateObject("WdScript.Shell")
+objShell.Run """C:\Program Files\WebDrive\webdrive.exe"" /s:""site"""
+Set objShell = Nothing
+
+
+An approach as below would be far more manageable:
+
+sCmd="C:\Perc\mini.exe"
+aParm(0)="-f"
+aParm(1)="C:\Perc\config.txt"
+aParm(2)="MIS_Monitor"
+aParm(3)="HR_Admin"
+aParm(4)=" myserver "
+aParm(5)="HR"
+aParm(6)="DEV52"
+aParm(7)=FormatDateTime(Date() ,2)
+aParm(8)=FormatDateTime(Now() ,4)
+aParm(9)="ALERT"
+aParm(10) = "This is a test firing event from WMI using vbs"
+
+DQ = """"
+sParms = ""
+For i = 0 To UBound(aParm)
+    sParms = sParms & " " & DQ & aParm(i) & DQ
+Next
+
+Set oWshShell = CreateObject("WScript.Shell")
+oWshShell.run sCmd & sParms, 1, True
+

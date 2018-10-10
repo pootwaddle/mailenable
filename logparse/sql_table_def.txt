@@ -1,0 +1,26 @@
+--Table: collected
+
+--DROP TABLE IF EXISTS collected;
+
+CREATE TABLE collected (
+  id           int AUTO_INCREMENT NOT NULL,
+  ip           varchar(15) NOT NULL,
+  `host`       varchar(30),
+  isp          varchar(50),
+  city         varchar(20),
+  countrycode  char(3),
+  countryname  varchar(30),
+  latitude     decimal(11,8),
+  longitude    decimal(11,8),
+  seen         timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  /* Keys */
+  PRIMARY KEY (id)
+) ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX collected_index01
+  ON collected
+  (ip);
+
+CREATE INDEX collected_index02
+  ON collected
+  (countrycode);
