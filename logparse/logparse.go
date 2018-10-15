@@ -166,7 +166,7 @@ func main() {
 	lastTime := loadConfig()
 
 	//prepare statements:
-	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)")
+	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)  ON DUPLICATE KEY UPDATE count = count + 1")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
 		os.Exit(1)
@@ -180,7 +180,8 @@ func main() {
 	}
 	defer ins2cleanitqry.Close()
 
-	selectIP, err := con.Prepare("Select ip from collected") //later we might want a where clause
+	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=90") //later we might want a where clause
+
 	if err != nil {
 		rlog.Error(fmt.Sprintf("Error creating selectIP, [%s]", err))
 		os.Exit(1)

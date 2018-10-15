@@ -58,7 +58,7 @@ func main() {
 	defer con.Close()
 
 	//prepare statements:
-	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)")
+	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)  ON DUPLICATE KEY UPDATE count = count + 1")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
 		os.Exit(1)
@@ -80,12 +80,14 @@ func main() {
 		y := lineArray[x]
 		if len(y) > 6 {
 
-			geo, err := geolocate.GetGeoData(y)
+			//IP,192.168.232, add 112 as 4th octet
+			ip := y[3:] + ".112"
+			geo, err := geolocate.GetGeoData(ip)
 
 			if err != nil {
-				rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y, err))
+				rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", ip, err))
 			} else {
-				rlog.Info(fmt.Sprintf("Line: %d  Code: %s  %s", x, y, geo.CountryCode))
+				rlog.Info(fmt.Sprintf("Line: %d  Code: %s  %s, %s", x, y, ip, geo.CountryCode))
 				ipInfo[*geo]++
 			}
 		}
