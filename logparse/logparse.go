@@ -166,7 +166,7 @@ func main() {
 	lastTime := loadConfig()
 
 	//prepare statements:
-	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)  ON DUPLICATE KEY UPDATE count = count + 1")
+	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode, countryname, latitude, longitude, qty) values (?, ?, ?, ?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + ?")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
 		os.Exit(1)
@@ -180,7 +180,7 @@ func main() {
 	}
 	defer ins2cleanitqry.Close()
 
-	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=90") //later we might want a where clause
+	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=90")
 
 	if err != nil {
 		rlog.Error(fmt.Sprintf("Error creating selectIP, [%s]", err))
@@ -206,15 +206,13 @@ func main() {
 		if len(y[7]) > 3 {
 
 			if y[7][0:1] == "5" {
-				if y[7][0:3] != "530" {
-					codeSummary[y[7][:3]+" "+y[4]]++
-					geo, err := geolocate.GetGeoData(y[4])
-					if err != nil {
-						rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
-					} else {
-						rlog.Info(fmt.Sprintf("Line: %d  Code: %s  %s", x, y[7][:3], geo.CountryCode))
-						ipInfo[*geo]++
-					}
+				codeSummary[y[7][:3]+" "+y[4]]++
+				geo, err := geolocate.GetGeoData(y[4])
+				if err != nil {
+					rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
+				} else {
+					rlog.Info(fmt.Sprintf("Line: %d  Code: %s  %s", x, y[7][:3], geo.CountryCode))
+					ipInfo[*geo]++
 				}
 			}
 		}
@@ -223,7 +221,7 @@ func main() {
 	if len(ipInfo) > 0 {
 
 		rlog.Info("map.ipInfo ==> mysql.collected")
-		for i, _ := range ipInfo {
+		for i, j := range ipInfo {
 			_, err := insqry.Exec(i.IP,
 				i.Host,
 				i.ISP,
@@ -232,6 +230,8 @@ func main() {
 				i.CountryName,
 				i.Latitude,
 				i.Longitude,
+				j,
+				j,
 			)
 			if err != nil {
 				rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))

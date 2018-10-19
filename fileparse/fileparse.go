@@ -58,7 +58,7 @@ func main() {
 	defer con.Close()
 
 	//prepare statements:
-	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)  ON DUPLICATE KEY UPDATE count = count + 1")
+	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + 1")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
 		os.Exit(1)
