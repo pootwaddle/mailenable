@@ -147,7 +147,6 @@ func main() {
 	rlog.Info(os.Args[0] + " started")
 
 	// initialize our maps
-	codeSummary := make(map[string]int)
 	ipInfo := make(map[geolocate.GeoIPData]int)
 	collectedIPs := make(map[string]int)
 
@@ -206,7 +205,6 @@ func main() {
 		if len(y[7]) > 3 {
 
 			if y[7][0:1] == "5" {
-				codeSummary[y[7][:3]+" "+y[4]]++
 				geo, err := geolocate.GetGeoData(y[4])
 				if err != nil {
 					rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
