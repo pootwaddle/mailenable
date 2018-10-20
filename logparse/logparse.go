@@ -164,6 +164,7 @@ func main() {
 	defer con.Close()
 
 	lastTime := loadConfig()
+	potential_new_ip := false
 
 	//prepare statements:
 	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode, countryname, latitude, longitude, qty) values (?, ?, ?, ?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + ?")
@@ -204,8 +205,10 @@ func main() {
 	for x := lastTime; x < len(lineArray); x++ {
 		y := lineArray[x]
 		if len(y[7]) > 3 {
-
 			if y[7][0:1] == "5" {
+				if y[7][0:3] != "530" {
+					potential_new_ip = true
+				}
 				geo, err := geolocate.GetGeoData(y[4])
 				if err != nil {
 					rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
@@ -247,21 +250,25 @@ func main() {
 			}
 		}
 
-		rlog.Info("mysql.collected ==> map.collectedIPs")
-		exportCollectedIPs(selectIP, collectedIPs)
+		if potential_new_ip {
+			rlog.Info("mysql.collected ==> map.collectedIPs")
+			exportCollectedIPs(selectIP, collectedIPs)
 
-		rlog.Info("map.collectedIPs ==> moe.smtp-deny")
-		outputFileName := filepath.Join("\\\\moe\\c\\Program Files (x86)\\Mail Enable\\Config\\SMTP-DENY.TAB")
-		exportToFile(outputFileName, collectedIPs)
+			rlog.Info("map.collectedIPs ==> moe.smtp-deny")
+			outputFileName := filepath.Join("\\\\moe\\c\\Program Files (x86)\\Mail Enable\\Config\\SMTP-DENY.TAB")
+			exportToFile(outputFileName, collectedIPs)
 
-		rlog.Info("map.collectedIPs ==> curly.smtp-deny")
-		outputFileName = filepath.Join("\\\\curly\\c\\Program Files\\Mail Enable\\Config\\SMTP-DENY.TAB")
-		exportToFile(outputFileName, collectedIPs)
+			rlog.Info("map.collectedIPs ==> curly.smtp-deny")
+			outputFileName = filepath.Join("\\\\curly\\c\\Program Files\\Mail Enable\\Config\\SMTP-DENY.TAB")
+			exportToFile(outputFileName, collectedIPs)
 
-		rlog.Info("map.collectedIPs ==> file.archive")
-		outputFileName = fmt.Sprintf("SMTP-DENY_%s", time.Now().Format("20060102_150405"))
-		outputFileName = filepath.Join("\\\\moe\\d\\archive\\" + outputFileName + ".tab")
-		exportToFile(outputFileName, collectedIPs)
+			rlog.Info("map.collectedIPs ==> file.archive")
+			outputFileName = fmt.Sprintf("SMTP-DENY_%s", time.Now().Format("20060102_150405"))
+			outputFileName = filepath.Join("\\\\moe\\d\\archive\\" + outputFileName + ".tab")
+			exportToFile(outputFileName, collectedIPs)
+		} else {
+			rlog.Info("no potential new IPs")
+		}
 	} else {
 		rlog.Info("no rogue IPs collected.")
 	}
