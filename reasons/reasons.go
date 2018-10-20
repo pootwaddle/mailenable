@@ -11,12 +11,12 @@ package main
 
 import (
 	"bufio"
-	"encoding/csv"
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -87,48 +87,56 @@ func main() {
 	   RECIP,tj_droid@laughingj.com
 	*/
 
-	iFile, err := os.Open("C:\\AUTOJOB\\cleanit.csv")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to open %s\r\n", "C:\\AUTOJOB\\cleanit.csv")
-		return
-	}
-	defer iFile.Close()
-
-	iFileScanner := csv.NewReader(iFile)
-	iFileScanner.Comma = ','
-	iFileScanner.TrimLeadingSpace = true
-	iFileScanner.FieldsPerRecord = -1
-
 	fmt.Printf("\r\nInitializing...\r\n")
 
-	for {
-		record, err := iFileScanner.Read()
-		if err == io.EOF || record[0] == "\x1A" {
-			break
-		} else if err != nil {
-			fmt.Println("Error:", err)
-			break
+	iFile, err := ioutil.ReadFile(filepath.Join("C:/AUTOJOB/" + "cleanit.csv"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to open %s\r\n", filepath.Join("C:/AUTOJOB/"+"cleanit.csv"))
+		return
+	}
+
+	iFile = bytes.Replace(iFile, []byte("\r\n"), []byte("\n"), -1)
+
+	var l1 []string
+
+	//skip BOM if it exists
+	if iFile[0] == 0xEf {
+		l1 = strings.Split(string(iFile[3:]), "\n")
+	} else {
+		l1 = strings.Split(string(iFile), "\n")
+	}
+
+	var lines [][]string
+
+	for _, line := range l1 {
+		line := strings.Trim(line, " ")
+		if line != "" {
+			fields := strings.Split(line, ",")
+
+			lines = append(lines, fields)
 		}
+	}
 
-		record[1] = strings.ToLower(record[1])
-
-		switch strings.ToUpper(record[0]) {
+	for _, y := range lines {
+		y[0] = strings.Trim(strings.ToUpper(y[0]), " ")
+		y[1] = strings.Trim(strings.ToLower(y[1]), " ")
+		switch y[0] {
 		case "RECIP":
-			recip[record[1]]++
+			recip[y[1]]++
 		case "TLD":
-			tlds[record[1]]++
+			tlds[y[1]]++
 		case "IP":
-			ips[record[1]]++
+			ips[y[1]]++
 		case "SENDER":
-			sender_match[record[1]]++
+			sender_match[y[1]]++
 		case "DOMAIN":
-			domains[record[1]]++
+			domains[y[1]]++
 		case "HAMDOM":
-			hamdom[record[1]]++
+			hamdom[y[1]]++
 		case "PHRASES":
-			phrases = append(phrases, record[1]) //phrases is an array, not a map...
+			phrases = append(phrases, y[1]) //phrases is slice, not a map...
 		default:
-			fmt.Println(fmt.Sprintf("%s doesn't match", record[0]))
+			fmt.Println(fmt.Sprintf("%s doesn't match (%s)", y[0], y[1]))
 		}
 	}
 

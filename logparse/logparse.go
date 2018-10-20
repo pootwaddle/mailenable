@@ -103,6 +103,7 @@ func exportCollectedIPs(selectIP *sql.Stmt, ipMap map[string]int) {
 			ipMap[newIP]++
 		}
 	}
+	rlog.Info(fmt.Sprintf("We have collected %d unique IP blocks", len(ipMap)))
 }
 
 func modifyIP(origIP string, addwildcard bool) string {
@@ -142,7 +143,7 @@ func main() {
 	//initialize logging
 	//	ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102_150405"))
 	ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102"))
-	os.Setenv("RLOG_LOG_FILE", filepath.Join("/archive/"+ologfileName+".log"))
+	os.Setenv("RLOG_LOG_FILE", filepath.Join("D:/archive/"+ologfileName+".log"))
 	rlog.UpdateEnv()
 	rlog.Info(os.Args[0] + " started")
 
@@ -259,7 +260,7 @@ func main() {
 
 		rlog.Info("map.collectedIPs ==> file.archive")
 		outputFileName = fmt.Sprintf("SMTP-DENY_%s", time.Now().Format("20060102_150405"))
-		outputFileName = filepath.Join("/archive/" + outputFileName + ".tab")
+		outputFileName = filepath.Join("\\\\moe\\d\\archive\\" + outputFileName + ".tab")
 		exportToFile(outputFileName, collectedIPs)
 	} else {
 		rlog.Info("no rogue IPs collected.")
