@@ -181,7 +181,7 @@ func main() {
 	}
 	defer ins2cleanitqry.Close()
 
-	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=90")
+	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=30")
 
 	if err != nil {
 		rlog.Error(fmt.Sprintf("Error creating selectIP, [%s]", err))
@@ -256,10 +256,6 @@ func main() {
 
 			rlog.Info("map.collectedIPs ==> moe.smtp-deny")
 			outputFileName := filepath.Join("\\\\moe\\c\\Program Files (x86)\\Mail Enable\\Config\\SMTP-DENY.TAB")
-			exportToFile(outputFileName, collectedIPs)
-
-			rlog.Info("map.collectedIPs ==> curly.smtp-deny")
-			outputFileName = filepath.Join("\\\\curly\\c\\Program Files\\Mail Enable\\Config\\SMTP-DENY.TAB")
 			exportToFile(outputFileName, collectedIPs)
 
 			rlog.Info("map.collectedIPs ==> file.archive")
