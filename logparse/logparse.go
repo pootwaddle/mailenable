@@ -164,7 +164,13 @@ func main() {
 	defer con.Close()
 
 	lastTime := loadConfig()
-	potential_new_ip := false
+	potentialNewIP := false
+	forceUpdate := false
+
+	if len(os.Args) > 1 {
+		forceUpdate = true
+		rlog.Info("forceUpdate is true")
+	}
 
 	//prepare statements:
 	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode, countryname, latitude, longitude, qty) values (?, ?, ?, ?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + ?")
@@ -204,23 +210,35 @@ func main() {
 	rlog.Info("Parsing " + fileName)
 	for x := lastTime; x < len(lineArray); x++ {
 		y := lineArray[x]
+		// EHLO or HELO
+		if y[5] == "HELO" || y[5] == "EHLO" {
+			potentialNewIP = true
+			geo, err := geolocate.GetGeoData(y[4])
+			if err != nil {
+				rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
+			} else if geo.CountryCode != "US" {
+				rlog.Info(fmt.Sprintf("Line: %d  CountryCode: %s  %s", x, geo.CountryCode, y[6]))
+				ipInfo[*geo]++
+			}
+
+		}
 		if len(y[7]) > 3 {
 			if y[7][0:1] == "5" {
 				if y[7][0:3] != "530" {
-					potential_new_ip = true
+					potentialNewIP = true
 				}
 				geo, err := geolocate.GetGeoData(y[4])
 				if err != nil {
 					rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
 				} else {
-					rlog.Info(fmt.Sprintf("Line: %d  Code: %s  %s", x, y[7][:3], geo.CountryCode))
+					rlog.Info(fmt.Sprintf("Line: %d  CountryCode: %s  %s", x, geo.CountryCode, y[7][:3]))
 					ipInfo[*geo]++
 				}
 			}
 		}
 	}
 
-	if len(ipInfo) > 0 {
+	if (len(ipInfo) > 0) || forceUpdate {
 
 		rlog.Info("map.ipInfo ==> mysql.collected")
 		for i, j := range ipInfo {
@@ -250,7 +268,7 @@ func main() {
 			}
 		}
 
-		if potential_new_ip {
+		if potentialNewIP || forceUpdate {
 			rlog.Info("mysql.collected ==> map.collectedIPs")
 			exportCollectedIPs(selectIP, collectedIPs)
 
