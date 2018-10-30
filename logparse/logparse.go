@@ -217,7 +217,7 @@ func main() {
 			if err != nil {
 				rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
 			} else if geo.CountryCode != "US" {
-				rlog.Info(fmt.Sprintf("Line: %d  CountryCode: %s  %s", x, geo.CountryCode, y[6]))
+				rlog.Info(fmt.Sprintf("Line: %d  IP: %s CountryCode: %s  %s", x, y[4], geo.CountryCode, y[6]))
 				ipInfo[*geo]++
 			}
 
@@ -231,7 +231,7 @@ func main() {
 				if err != nil {
 					rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
 				} else {
-					rlog.Info(fmt.Sprintf("Line: %d  CountryCode: %s  %s", x, geo.CountryCode, y[7][:3]))
+					rlog.Info(fmt.Sprintf("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3]))
 					ipInfo[*geo]++
 				}
 			}
