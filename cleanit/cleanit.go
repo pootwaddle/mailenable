@@ -68,6 +68,37 @@ type trigger struct {
 	Count   int    `json:"count"`
 }
 
+func loadCSVfile(iFilename string) ([][]string, error) {
+	var lines [][]string
+
+	iFile, err := ioutil.ReadFile(iFilename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to open %s\n", iFilename)
+		return lines, err
+	}
+
+	iFile = bytes.Replace(iFile, []byte("\n"), []byte("\n"), -1)
+
+	var l1 []string
+
+	//skip BOM if it exists
+	if iFile[0] == 0xEf {
+		l1 = strings.Split(string(iFile[3:]), "\n")
+	} else {
+		l1 = strings.Split(string(iFile), "\n")
+	}
+
+	for _, line := range l1 {
+		line := strings.Trim(line, " ")
+		if line != "" {
+			fields := strings.Split(line, ",")
+
+			lines = append(lines, fields)
+		}
+	}
+	return lines, nil
+}
+
 func main() {
 
 	x1 := time.Now()
@@ -77,10 +108,11 @@ func main() {
 	tlds := make(map[string]int)         //tld - map
 	domains := make(map[string]int)      //domain -- map
 	sender_match := make(map[string]int) //sender_match - map
-	hamdom := make(map[string]int)       //ham domain - map
-	ips := make(map[string]int)          //ip address - map 198.2.30
-	phrases := []string{}                //slice used to do substring search
-	triggers := make(map[string]int)     //map for holding counts of "triggering" criteria
+	hamdom := make(map[string]int)       //ham domain - map	var lines [][]string
+
+	ips := make(map[string]int)      //ip address - map 198.2.30
+	phrases := []string{}            //slice used to do substring search
+	triggers := make(map[string]int) //map for holding counts of "triggering" criteria
 
 	//cleanit.csv is our comma-separated values to read into our maps
 	//Example file records:
@@ -93,34 +125,12 @@ func main() {
 	   TLD,.vn
 	   RECIP,tj_droid@laughingj.com
 	*/
-	fmt.Printf("\r\nInitializing...\r\n")
+	fmt.Printf("\nInitializing...\n")
 
-	iFile, err := ioutil.ReadFile(filepath.Join("C:/AUTOJOB/" + "cleanit.csv"))
+	lines, err := loadCSVfile(filepath.Join("C:/AUTOJOB/" + "cleanit.csv"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to open %s\r\n", filepath.Join("C:/AUTOJOB/"+"cleanit.csv"))
+		fmt.Println(err)
 		return
-	}
-
-	iFile = bytes.Replace(iFile, []byte("\r\n"), []byte("\n"), -1)
-
-	var l1 []string
-
-	//skip BOM if it exists
-	if iFile[0] == 0xEf {
-		l1 = strings.Split(string(iFile[3:]), "\n")
-	} else {
-		l1 = strings.Split(string(iFile), "\n")
-	}
-
-	var lines [][]string
-
-	for _, line := range l1 {
-		line := strings.Trim(line, " ")
-		if line != "" {
-			fields := strings.Split(line, ",")
-
-			lines = append(lines, fields)
-		}
 	}
 
 	for _, y := range lines {

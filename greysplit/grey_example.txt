@@ -1,0 +1,5 @@
+N,123.175.167,jennifer,laughingj.com,jennifer@laughingj.com.tab
+HN,148.105.14,bounce-mc.us10_40005005.614667-pootwaddle=pootwaddle.com,mail204.sea81.mcsv.net,pootwaddle@pootwaddle.com.tab
+N,177.129.88,accdeptfedminagric64,gmail.com,payments@lifeandfiresafety.com.tab
+N,209.85.166,noreply-dmarc-support,google.com,monitoring@laughingj.com.tab
+

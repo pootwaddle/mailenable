@@ -1,0 +1,100 @@
+package main
+
+import (
+	"bufio"
+	"encoding/csv"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"_library/wbj"
+)
+
+func main() {
+	if wbj.CheckCommandLine(2, "inputfile") != 0 {
+		return
+	}
+
+	var (
+		iFile       *os.File
+		oFile1      *os.File
+		oFile2      *os.File
+		record      []string
+		err         error
+		recordCount int = 0
+	)
+
+	progName := os.Args[0]                 //executable
+	iFileName := filepath.Base(os.Args[1]) //input file
+	parsedFileName := strings.TrimSuffix(iFileName, filepath.Ext(iFileName))
+	extension := filepath.Ext(iFileName)
+
+	iFile, err = os.Open(iFileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to open %s\r\n", iFileName)
+		return
+	}
+	defer iFile.Close()
+	iFileScanner := csv.NewReader(iFile)
+	iFileScanner.Comma = ','
+	iFileScanner.TrimLeadingSpace = true
+	iFileScanner.FieldsPerRecord = -1
+
+	oFileName1 := "greysplit.csv"
+	oFile1, err = os.Create(oFileName1)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to open %s\r\n", oFileName1)
+		return
+	}
+	defer oFile1.Close()
+	oFileW1 := bufio.NewWriter(oFile1)
+
+	oFileName2 := "HD.csv"
+	oFile2, err = os.Create(oFileName2)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to open %s\r\n", oFileName2)
+		return
+	}
+	defer oFile2.Close()
+	oFileW2 := bufio.NewWriter(oFile2)
+	oFileW2.WriteString("rem batch file to create greylist exceptions\r\n")
+	oFileW2.WriteString("c:\r\n")
+	oFileW2.WriteString(fmt.Sprintf("cd \"%s\"\r\n", "\\Program Files (x86)\\Mail Enable\\Config\\Connections\\Greylist\\"))
+
+	fmt.Printf("%s Processing %s  %s  %s  %s\r\n", progName, iFileName, parsedFileName, oFileName1, extension)
+
+	for {
+		record, err = iFileScanner.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Println("Error:", err)
+			break
+		}
+
+		recordCount++
+
+		for _, a := range record[0] {
+			switch string(a) {
+			case "H":
+				oFileW1.WriteString("HAMDOM," + record[3] + "\r\n")
+				oFileW2.WriteString(fmt.Sprintf("copy .\\Exceptions\\amazon.com.tab .\\Exceptions\\%s.tab\r\n", record[3]))
+				oFileW2.WriteString(fmt.Sprintf("del *%s*.*\r\n", record[3]))
+			case "D":
+				oFileW1.WriteString("DOMAIN," + record[3] + "\r\n")
+			case "S":
+				oFileW1.WriteString("SENDER," + record[2] + "\r\n")
+			case "I":
+				oFileW1.WriteString("IP," + record[1] + "\r\n")
+			case "N":
+				oFileW2.WriteString(fmt.Sprintf("del *%s*.*\r\n", record[3]))
+			}
+		}
+		oFileW1.Flush()
+		oFileW2.Flush()
+	}
+
+	fmt.Printf(fmt.Sprintf("\r\nDone. Processed %d records.\r\n", recordCount))
+}
