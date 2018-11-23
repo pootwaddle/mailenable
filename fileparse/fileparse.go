@@ -76,12 +76,23 @@ func main() {
 	lineArray := LoadFile(fileName)
 	rlog.Info(fmt.Sprintf("loaded %d lines from %s", len(lineArray), fileName))
 
+	var ip string
+
 	for x := 0; x < len(lineArray); x++ {
 		y := lineArray[x]
-		if len(y) > 6 {
+		y = strings.Replace(y, " ", "", -1)
 
-			//IP,192.168.232, add 112 as 4th octet
-			ip := y[3:] + ".112"
+		if len(y) > 6 {
+			ip = y[3:]
+			ipsplit := strings.Split(ip, ".")
+
+			if len(ipsplit) == 4 {
+				ip = y[3:]
+			} else {
+				//IP,192.168.232, add 112 as 4th octet
+				ip = y[3:] + ".112"
+			}
+
 			geo, err := geolocate.GetGeoData(ip)
 
 			if err != nil {

@@ -1,0 +1,55 @@
+A924F64B0E7150F147CCC25CF017C47712084B6EBB75CC15E794BF40A111598C
+{
+   "applicationVersion" : "3.6.1.2711",
+   "clientID" : "",
+   "clientType" : "other",
+   "componentsUpdatePackageVersion" : "1.0.482",
+   "cpu" : "x64",
+   "dbSDKUpdatePackageVersion" : "1.0.7927",
+   "detectionDateTime" : "2018-11-19T23:13:04Z",
+   "fileSystem" : "NTFS",
+   "id" : "aaff0aa6-ec50-11e8-9c69-c81f66c00e74",
+   "isUserAdmin" : true,
+   "licenseState" : "trial",
+   "linkagePhaseComplete" : false,
+   "loggedOnUserName" : "System",
+   "machineID" : "",
+   "os" : "Windows Server 2012 R2",
+   "schemaVersion" : 10,
+   "sourceDetails" : {
+      "type" : "mwac"
+   },
+   "threats" : [
+      {
+         "linkedTraces" : [
+
+         ],
+         "mainTrace" : {
+            "cleanAction" : "block",
+            "cleanResult" : "successful",
+            "cleanResultErrorCode" : 0,
+            "cleanTime" : "",
+            "generatedByPostCleanupAction" : false,
+            "id" : "aaff0aa7-ec50-11e8-9fd1-c81f66c00e74",
+            "linkType" : "none",
+            "objectMD5" : "",
+            "objectPath" : "",
+            "objectSha256" : "",
+            "objectType" : "website",
+            "websiteData" : {
+               "blockType" : 12,
+               "ip" : "154.73.182.16",
+               "isInbound" : true,
+               "port" : 25,
+               "processPath" : "C:\\PROGRA~2\\MAILEN~1\\Bin64\\MESMTPC.exe",
+               "url" : ""
+            }
+         },
+         "ruleID" : -1,
+         "rulesVersion" : "0.0.0",
+         "threatID" : -1,
+         "threatName" : ""
+      }
+   ],
+   "threatsDetected" : 1
+}
