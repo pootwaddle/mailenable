@@ -106,20 +106,21 @@ func main() {
 
 	for i, j := range ipInfo {
 		fmt.Println(i, j)
-		_, err := insqry.Exec(i.IP,
-			i.Host,
-			i.ISP,
-			i.City,
-			i.CountryCode,
-			i.CountryName,
-			i.Latitude,
-			i.Longitude,
-		)
-		if err != nil {
-			rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
-			os.Exit(1)
+		if i.CountryCode != "US" {
+			_, err := insqry.Exec(i.IP,
+				i.Host,
+				i.ISP,
+				i.City,
+				i.CountryCode,
+				i.CountryName,
+				i.Latitude,
+				i.Longitude,
+			)
+			if err != nil {
+				rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
+				os.Exit(1)
+			}
 		}
-
 	}
 
 	fmt.Println(os.Args[0], "completed")
