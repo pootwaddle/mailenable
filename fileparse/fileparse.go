@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	//"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +32,18 @@ func LoadFile(fileName string) []string {
 	return l1
 }
 
+func fullIP(ip string) string {
+	ipsplit := strings.Split(ip, ".")
+
+	if len(ipsplit) == 4 {
+		return ip
+	} else {
+		//IP,192.168.232, add 112 as 4th octet
+		return ip + ".112"
+	}
+
+}
+
 func main() {
 
 	//initialize logging
@@ -42,39 +53,40 @@ func main() {
 	rlog.UpdateEnv()
 	rlog.Info(os.Args[0] + " started")
 
-	// initialize our maps
-	ipInfo := make(map[geolocate.GeoIPData]int)
+	if len(os.Args) < 2 {
+		rlog.Info("Usage: fileparse <ffffffff>")
+		os.Exit(1)
+	}
+
+	fileName := os.Args[1]
+	rlog.Info("Input File is ", fileName)
+
+	lineArray := LoadFile(fileName)
+	rlog.Info(fmt.Sprintf("loaded %d lines from %s", len(lineArray), fileName))
 
 	//MySQL Connection:
 	var server string = "tcp:192.168.106.253:3306"
 	var database string = "geoip"
 	var user string = "sb"
 	var pwd string = "12345"
+	rlog.Info("connect to database started")
 	con, err := sql.Open("mymysql", server+"*"+database+"/"+user+"/"+pwd)
 	if err != nil {
 		rlog.Error(fmt.Sprintf("Unable to connect to Database [%s], [%s], [%s]\r\n", database, user, err))
 		os.Exit(1)
 	}
 	defer con.Close()
+	rlog.Info("connection to database established")
 
 	//prepare statements:
+	rlog.Info("prepare insqry")
 	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode,countryname, latitude,longitude) values (?, ?, ?, ?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + 1")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
 		os.Exit(1)
 	}
 	defer insqry.Close()
-
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: fileparse <ffffffff>")
-		os.Exit(1)
-	}
-
-	fileName := os.Args[1]
-	fmt.Println(fileName)
-
-	lineArray := LoadFile(fileName)
-	rlog.Info(fmt.Sprintf("loaded %d lines from %s", len(lineArray), fileName))
+	rlog.Info("insqry prepared")
 
 	var ip string
 
@@ -83,42 +95,36 @@ func main() {
 		y = strings.Replace(y, " ", "", -1)
 
 		if len(y) > 6 {
-			ip = y[3:]
-			ipsplit := strings.Split(ip, ".")
+			ip = fullIP(y[3:])
 
-			if len(ipsplit) == 4 {
-				ip = y[3:]
+			geo := geolocate.GetGeoData(ip)
+
+			if !geo.Located {
+				rlog.Info(fmt.Sprintf("Line: %4d  Geolocate failed - %s - %s", x, ip, geo.Errmsg))
 			} else {
-				//IP,192.168.232, add 112 as 4th octet
-				ip = y[3:] + ".112"
-			}
+				rlog.Info(fmt.Sprintf("Line: %4d Code: %s  %s, %s", x, y, ip, geo.CountryCode))
 
-			geo, err := geolocate.GetGeoData(ip)
+				//geo.ConfirmBlock() commented out because these IPs are confirmed spam senders
+				geo.Block = true
 
-			if err != nil {
-				rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", ip, err))
-			} else {
-				rlog.Info(fmt.Sprintf("Line: %d  Code: %s  %s, %s", x, y, ip, geo.CountryCode))
-				ipInfo[*geo]++
-			}
-		}
-	}
+				if geo.Block {
+					_, err := insqry.Exec(geo.IP,
+						geo.Host,
+						geo.ISP,
+						geo.City,
+						geo.CountryCode,
+						geo.CountryName,
+						geo.Latitude,
+						geo.Longitude,
+					)
+					if err != nil {
+						rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
+					}
+					rlog.Info(fmt.Sprintf("Line: %4d Code: %s  %s, %s - Inserted into database", x, y, ip, geo.CountryCode))
+				} else {
+					rlog.Info(fmt.Sprintf("Line: %4d Code: %s  %s, %s - Not Inserted into databse", x, y, ip, geo.CountryCode))
+				}
 
-	for i, j := range ipInfo {
-		fmt.Println(i, j)
-		if i.CountryCode != "US" {
-			_, err := insqry.Exec(i.IP,
-				i.Host,
-				i.ISP,
-				i.City,
-				i.CountryCode,
-				i.CountryName,
-				i.Latitude,
-				i.Longitude,
-			)
-			if err != nil {
-				rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
-				os.Exit(1)
 			}
 		}
 	}

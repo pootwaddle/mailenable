@@ -77,7 +77,7 @@ func loadCSVfile(iFilename string) ([][]string, error) {
 		return lines, err
 	}
 
-	iFile = bytes.Replace(iFile, []byte("\n"), []byte("\n"), -1)
+	iFile = bytes.Replace(iFile, []byte("\r"), []byte(""), -1)
 
 	var l1 []string
 
@@ -93,7 +93,9 @@ func loadCSVfile(iFilename string) ([][]string, error) {
 		if line != "" {
 			fields := strings.Split(line, ",")
 
-			lines = append(lines, fields)
+			if len(fields) == 2 {
+				lines = append(lines, fields)
+			}
 		}
 	}
 	return lines, nil
@@ -168,6 +170,31 @@ func main() {
 	//filenames we are deleting are actually being moved to a secondary folder
 	//greylist folder filename.tab ==> C:\GG\filename~nnnnnn~.x1
 
+	/*
+		var tldArray []string
+		for k, v := range tlds {
+			fmt.Println(k, "   ", v)
+			tldArray = append(tldArray, k)
+			}
+		for x, y := range tldArray {
+			fmt.Println(x, y)
+			fmt.Println(fmt.Sprintf("%x", "|"+tldArray[x]+"|"))
+		}
+
+		for k, _ := range hamdom {
+				fmt.Printf(fmt.Sprintf("key: %s\n", k))
+			}
+			for k, _ := range sender_match {
+				fmt.Printf(fmt.Sprintf("key: %s\n", k))
+			}
+			for k, _ := range domains {
+				fmt.Printf(fmt.Sprintf("key: %s\n", k))
+			}
+			for k, _ := range tlds {
+				fmt.Printf(fmt.Sprintf("key: %s\n", k))
+			}
+	*/
+
 	var sender em1
 
 	files, err := ioutil.ReadDir(".")
@@ -209,7 +236,7 @@ func main() {
 
 		if strings.Contains(files[x].Name(), ".tab") {
 			sender.fname = files[x].Name()
-			parts := strings.Split(files[x].Name(), " ")
+			parts := strings.Split(strings.ToLower(files[x].Name()), " ")
 
 			r := parts[2]
 			if len(r) > 4 {
@@ -217,27 +244,30 @@ func main() {
 			}
 
 			s := parts[1]
-			sender.email = s
-			sender.domain = strings.Split(s, "@")[1]
-			sender.sender = strings.Split(s, "@")[0]
-			sender.tld = sender.domain[strings.LastIndex(sender.domain, "."):]
-			sender.domainLessTLD = sender.domain[:strings.LastIndex(sender.domain, ".")]
-			sender.domain = strings.ToLower(sender.domain)
-			sender.sender = strings.ToLower(sender.sender)
-			sender.tld = strings.ToLower(sender.tld)
-			sender.ip = parts[0]
-			sender.recip = r
+			sender.email = strings.Trim(s, " ")
+			sender.domain = strings.Trim(strings.Split(s, "@")[1], " ")
+			sender.sender = strings.Trim(strings.Split(s, "@")[0], " ")
+			sender.tld = strings.Trim(sender.domain[strings.LastIndex(sender.domain, "."):], " ")
+			sender.domainLessTLD = strings.Trim(sender.domain[:strings.LastIndex(sender.domain, ".")], " ")
+			//	sender.domain = strings.ToLower(sender.domain)
+			//	sender.sender = strings.ToLower(sender.sender)
+			//	sender.tld = strings.ToLower(sender.tld)
+			sender.ip = strings.Trim(parts[0], " ")
+			sender.recip = strings.Trim(r, " ")
 
+			//fmt.Println(sender)
 			if hamdom[sender.domain] != 0 {
 				excpt = true
 			}
 
+			//			fmt.Println("Recip:", sender.recip, "--> ", recip[sender.recip])
 			if recip[sender.recip] != 0 {
 				fmt.Println(" RECIP MATCH: ", sender.recip)
 				reasons = reasons + "R"
 				triggers["R~"+sender.recip]++
 			}
 
+			//			fmt.Println("Sender:", sender.sender, "--> ", sender_match[sender.sender])
 			if sender_match[sender.sender] != 0 {
 				fmt.Println("SENDER MATCH: ", sender.sender)
 				reasons = reasons + "S"
@@ -246,6 +276,7 @@ func main() {
 				}
 			}
 
+			//			fmt.Println("Domain:", sender.domain, "--> ", domains[sender.domain])
 			if domains[sender.domain] != 0 {
 				fmt.Println("DOMAIN MATCH: ", sender.domain)
 				reasons = reasons + "D"
@@ -264,6 +295,7 @@ func main() {
 				}
 			}
 
+			//			fmt.Println("TLD:", len(tlds), "  ", sender.tld, "--> ", tlds[sender.tld])
 			if tlds[sender.tld] != 0 {
 				fmt.Println("   TLD MATCH: ", sender.tld)
 				reasons = reasons + "T"

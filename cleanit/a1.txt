@@ -1,0 +1,24 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 527F-16C1
+
+ Directory of C:\Program Files (x86)\Mail Enable\Config\Connections\Greylist
+
+2019-06-06  06:58    <DIR>          .
+2019-06-06  06:58    <DIR>          ..
+2019-06-03  21:40    <DIR>          Exceptions
+2019-06-06  01:14                 0 107.161.82 bluesky_trump_care-tj=laughingj.com@hubrisn.pro tj@laughingj.com.tab
+2019-06-06  05:58                 0 107.161.82 roofing.cost.guide.offer-tj=laughingj.com@jackdm.world tj@laughingj.com.tab
+2019-06-05  22:49                 0 108.178.46 info@refinedmedia.com tj@laughingj.com.tab
+2019-06-06  06:37                 0 109.188.69 EarlCook@tm-moscow.ru bjarvis@laughingj.com.tab
+2019-06-06  06:43                 0 109.61.64 CharlesGutierrez@lipravus.it bjarvis@laughingj.com.tab
+2019-06-06  06:21                 0 112.170.31 CarlDavis@snoring-gone.com bjarvis@laughingj.com.tab
+2019-06-06  02:14                 0 134.73.49 net-loan-express-tj=laughingj.com@embraceba.pro tj@laughingj.com.tab
+2019-06-06  06:05                 0 146.20.191 bounce+438417.d7d02-tj=laughingj.com@mg.appointment-plus.com tj@laughingj.com.tab
+2019-06-06  03:23                 0 173.254.218 lendingitnow-tj=laughingj.com@bastiondsn.world tj@laughingj.com.tab
+2019-06-06  01:13                 0 190.232.81 gary.swales@garuda.com.au bjarvis@laughingj.com.tab
+2019-06-06  01:11                 0 190.42.254 gary.swales@garuda.com.au bjarvis@laughingj.com.tab
+2019-06-06  01:12                 0 190.43.158 gary.swales@garuda.com.au bjarvis@laughingj.com.tab
+2019-06-06  04:03                 0 209.85.160 noreply-dmarc-support@google.com monitoring@laughingj.com.tab
+2019-06-06  06:58                 0 a.txt
+              14 File(s)              0 bytes
+               3 Dir(s)  60,771,741,696 bytes free

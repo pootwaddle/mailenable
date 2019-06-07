@@ -139,7 +139,6 @@ func exportToFile(filepath string, collection map[string]int) {
 }
 
 func main() {
-
 	//initialize logging
 	//	ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102_150405"))
 	ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102"))
@@ -156,37 +155,39 @@ func main() {
 	var database string = "geoip"
 	var user string = "sb"
 	var pwd string = "12345"
+
+	rlog.Info("connect to database started")
 	con, err := sql.Open("mymysql", server+"*"+database+"/"+user+"/"+pwd)
 	if err != nil {
 		rlog.Error(fmt.Sprintf("Unable to connect to Database [%s], [%s], [%s]\r\n", database, user, err))
 		os.Exit(1)
 	}
 	defer con.Close()
+	rlog.Info("connection to database established")
 
 	lastTime := loadConfig()
 	potentialNewIP := false
-	forceUpdate := false
-
-	if len(os.Args) > 1 {
-		forceUpdate = true
-		rlog.Info("forceUpdate is true")
-	}
 
 	//prepare statements:
+	rlog.Info("prepare insqry")
 	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode, countryname, latitude, longitude, qty) values (?, ?, ?, ?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + ?")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
 		os.Exit(1)
 	}
 	defer insqry.Close()
+	rlog.Info("insqry prepared")
 
+	rlog.Info("prepare ins2cleanitqry")
 	ins2cleanitqry, err := con.Prepare("insert ignore into cleanit (tag, value) values (?, ?)")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
 		os.Exit(1)
 	}
 	defer ins2cleanitqry.Close()
+	rlog.Info("ins2cleanitqry prepared")
 
+	rlog.Info("prepare selectIP")
 	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=30")
 
 	if err != nil {
@@ -194,6 +195,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer selectIP.Close()
+	rlog.Info("selectIP prepared")
 
 	fileName := filepath.Join("./" + fmt.Sprintf("SMTP-Activity-%s.log", time.Now().Format("060102")))
 	rlog.Info("parsing " + fileName)
@@ -207,68 +209,67 @@ func main() {
 		lastTime = 0
 	}
 
-	rlog.Info("Parsing " + fileName)
+	geo := &geolocate.GeoIPData{}
+
 	for x := lastTime; x < len(lineArray); x++ {
 		y := lineArray[x]
 		// EHLO or HELO
-		if y[5] == "HELO" || y[5] == "EHLO" {
+		if (y[5] == "HELO") || (y[5] == "EHLO") {
+			rlog.Info("Checking HELO - " + y[4] + " " + y[5] + y[6])
+			geo = geolocate.GetGeoData(y[4])
+			rlog.Info(fmt.Sprintf("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3]))
+			ipInfo[*geo]++
 			potentialNewIP = true
-			geo, err := geolocate.GetGeoData(y[4])
-			if err != nil {
-				rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
-			} else if geo.CountryCode != "US" {
-				rlog.Info(fmt.Sprintf("Line: %d  IP: %s CountryCode: %s  %s", x, y[4], geo.CountryCode, y[6]))
-				ipInfo[*geo]++
-			}
-
-		}
-		if len(y[7]) > 3 {
+		} else if len(y[7]) > 3 {
 			if y[7][0:1] == "5" {
-				if y[7][0:3] != "530" {
-					potentialNewIP = true
-				}
-				geo, err := geolocate.GetGeoData(y[4])
-				if err != nil {
-					rlog.Error(fmt.Sprintf("Geolocate failed - %s - %s", y[4], err))
-				} else {
-					rlog.Info(fmt.Sprintf("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3]))
-					ipInfo[*geo]++
-				}
+				geo.Code = y[7][0:3]
+				geo = geolocate.GetGeoData(y[4])
+				rlog.Info(fmt.Sprintf("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3]))
+				ipInfo[*geo]++
+				potentialNewIP = true
 			}
 		}
 	}
 
-	if (len(ipInfo) > 0) || forceUpdate {
+	if len(ipInfo) > 0 {
+
+		//if located and not safe....
 
 		rlog.Info("map.ipInfo ==> mysql.collected")
 		for i, j := range ipInfo {
-			_, err := insqry.Exec(i.IP,
-				i.Host,
-				i.ISP,
-				i.City,
-				i.CountryCode,
-				i.CountryName,
-				i.Latitude,
-				i.Longitude,
-				j,
-				j,
-			)
-			if err != nil {
-				rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
-				os.Exit(1)
+			i.ConfirmBlock()
+			if i.Block {
+				rlog.Info(fmt.Sprintf("Inserting %s %s %s", i.IP, i.CountryCode, i.ISP))
+				_, err := insqry.Exec(i.IP,
+					i.Host,
+					i.ISP,
+					i.City,
+					i.CountryCode,
+					i.CountryName,
+					i.Latitude,
+					i.Longitude,
+					j,
+					j,
+				)
+				if err != nil {
+					rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
+					os.Exit(1)
+				}
 			}
 		}
 
 		rlog.Info("map.ipInfo ==> mysql.cleanit")
+
 		for i, _ := range ipInfo {
 			_, err := ins2cleanitqry.Exec("IP", modifyIP(i.IP, false))
 			if err != nil {
 				rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
 				os.Exit(1)
 			}
+
 		}
 
-		if potentialNewIP || forceUpdate {
+		if potentialNewIP {
 			rlog.Info("mysql.collected ==> map.collectedIPs")
 			exportCollectedIPs(selectIP, collectedIPs)
 
