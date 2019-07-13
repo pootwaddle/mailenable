@@ -61,6 +61,8 @@ type em1 struct {
 	email         string
 	ip            string
 	recip         string
+	reasons       []string
+	exceptions    []string
 }
 
 type trigger struct {
@@ -111,8 +113,9 @@ func main() {
 	domains := make(map[string]int)      //domain -- map
 	sender_match := make(map[string]int) //sender_match - map
 	hamdom := make(map[string]int)       //ham domain - map	var lines [][]string
+	ips := make(map[string]int)          //ip address - map 198.2.30
+	except := make(map[string]int)       //email map of exceptions - emails we want to make sure get through
 
-	ips := make(map[string]int)      //ip address - map 198.2.30
 	phrases := []string{}            //slice used to do substring search
 	triggers := make(map[string]int) //map for holding counts of "triggering" criteria
 
@@ -151,6 +154,9 @@ func main() {
 			domains[y[1]]++
 		case "HAMDOM":
 			hamdom[y[1]]++
+		case "EXCEPT":
+			except[y[1]]++
+
 		case "PHRASES":
 			phrases = append(phrases, y[1]) //phrases is slice, not a map...
 		default:
@@ -165,6 +171,7 @@ func main() {
 	fmt.Printf(fmt.Sprintf("TLD map contains %d entries\r\n", len(tlds)))
 	fmt.Printf(fmt.Sprintf("IPS map contains %d entries\r\n", len(ips)))
 	fmt.Printf(fmt.Sprintf("RECIP map contains %d entries\r\n", len(recip)))
+	fmt.Printf(fmt.Sprintf("EXCEPT map contains %d entries\r\n", len(except)))
 	fmt.Printf(fmt.Sprintf("PHRASES array contains %d entries\r\n\r\n", len(phrases)))
 
 	//filenames we are deleting are actually being moved to a secondary folder
@@ -231,7 +238,8 @@ func main() {
 	}
 
 	for x, _ := range files {
-		reasons := ""
+		sender.reasons = sender.reasons[:0]
+		sender.exceptions = sender.exceptions[:0]
 		excpt := false
 
 		if strings.Contains(files[x].Name(), ".tab") {
@@ -255,101 +263,91 @@ func main() {
 			sender.ip = strings.Trim(parts[0], " ")
 			sender.recip = strings.Trim(r, " ")
 
-			//fmt.Println(sender)
+			//in our hamdom map? then mark this as an exception to all the other rules
 			if hamdom[sender.domain] != 0 {
 				excpt = true
+				sender.exceptions = append(sender.exceptions, "HAMDOM")
+				fmt.Println("hamdom exception")
 			}
 
-			//			fmt.Println("Recip:", sender.recip, "--> ", recip[sender.recip])
+			//in our exception map?  this is an email that we want to mark as an exception
+			if except[sender.email] != 0 {
+				excpt = true
+				sender.exceptions = append(sender.exceptions, "EMAIL")
+				fmt.Println("sender email exception")
+			}
+
+			//fmt.Println("Recip:", sender.recip, "--> ", recip[sender.recip])
 			if recip[sender.recip] != 0 {
 				fmt.Println(" RECIP MATCH: ", sender.recip)
-				reasons = reasons + "R"
-				triggers["R~"+sender.recip]++
+				sender.reasons = append(sender.reasons, "RECIP: "+sender.recip)
 			}
 
 			//			fmt.Println("Sender:", sender.sender, "--> ", sender_match[sender.sender])
 			if sender_match[sender.sender] != 0 {
 				fmt.Println("SENDER MATCH: ", sender.sender)
-				reasons = reasons + "S"
-				if !excpt {
-					triggers["S~"+sender.sender]++
-				}
+				sender.reasons = append(sender.reasons, "SENDER: "+sender.sender)
 			}
 
 			//			fmt.Println("Domain:", sender.domain, "--> ", domains[sender.domain])
 			if domains[sender.domain] != 0 {
 				fmt.Println("DOMAIN MATCH: ", sender.domain)
-				reasons = reasons + "D"
-				if !excpt {
-					triggers["D~"+sender.domain]++
-				}
+				sender.reasons = append(sender.reasons, "DOMAIN: "+sender.domain)
 			}
 
 			//I want to mark domains that are all digits as spam, so if my domainLessTLD is ""
 			//after filtering it , then mark it as spam....
 			if filter(sender.domainLessTLD, AllCharsLessDigits) == "" {
 				fmt.Println("DOMAIN ALL DIGITS:", sender.domain)
-				reasons = reasons + "Z"
-				if !excpt {
-					triggers["Z~"+sender.domainLessTLD]++
-				}
+				sender.reasons = append(sender.reasons, "ALL DIGITS: "+sender.domain)
 			}
 
 			//			fmt.Println("TLD:", len(tlds), "  ", sender.tld, "--> ", tlds[sender.tld])
 			if tlds[sender.tld] != 0 {
 				fmt.Println("   TLD MATCH: ", sender.tld)
-				reasons = reasons + "T"
-				if !excpt {
-					triggers["T~"+sender.tld]++
-				}
+				sender.reasons = append(sender.reasons, "TLD MATCH: "+sender.tld)
 			}
 
 			if ips[sender.ip] != 0 {
 				fmt.Println("    IP MATCH: ", sender.ip)
-				reasons = reasons + "I"
-				if !excpt {
-					triggers["I~"+sender.ip]++
-				}
+				sender.reasons = append(sender.reasons, "IP MATCH: "+sender.ip)
 			}
 
 			for _, val := range phrases {
 				if strings.Contains(sender.domain, val) {
 					fmt.Println("DOMAIN Contains: ", val)
-					reasons = reasons + "Pd"
-					if !excpt {
-						triggers["Pd~"+val]++
-					}
+					sender.reasons = append(sender.reasons, "PHRASE(DOMAIN): "+val)
 				}
+
 				if strings.Contains(sender.sender, val) {
 					fmt.Println("SENDER Contains: ", val)
-					reasons = reasons + "Ps"
-					if !excpt {
-						triggers["Ps~"+val]++
-					}
-				}
-
-			}
-			if (reasons != "") && (hamdom[sender.domain] != 0) {
-				if !(strings.Contains(reasons, "R")) {
-					fmt.Println("EXCEPTION: ", sender.domain)
-					fmt.Println(sender.email)
-					fmt.Println("")
-					reasons = ""
+					sender.reasons = append(sender.reasons, "PHRASE(SENDER): "+val)
 				}
 			}
 
-			if reasons != "" {
-				err := os.Rename(sender.fname, "C:\\GG\\"+strings.Replace(sender.fname, " ", "~", -1)[:len(sender.fname)-4]+"~"+reasons+"~"+sequence+"~.x1")
+			if excpt {
+				fmt.Println("EXCEPTIONS: ")
+				fmt.Println(sender.email)
+				for x, _ := range sender.exceptions {
+					fmt.Println(sender.exceptions[x])
+				}
+				sender.reasons = sender.reasons[:0]
+			}
+
+			if len(sender.reasons) > 0 {
+				err := os.Rename(sender.fname, "C:\\GG\\"+strings.Replace(sender.fname, " ", "~", -1)[:len(sender.fname)-4]+"~"+"reason"+"~"+sequence+"~.x1")
 
 				if err != nil {
 					fmt.Println(err)
 					//return
 				}
 
+				fmt.Println("SPAM: ")
 				fmt.Println(sender.email)
-				fmt.Println(r)
-				fmt.Println("")
-				reasons = ""
+				for x, _ := range sender.reasons {
+					fmt.Println(sender.reasons[x])
+					triggers[sender.reasons[x]]++
+				}
 			}
 		}
 	}

@@ -141,8 +141,12 @@ func exportToFile(filepath string, collection map[string]int) {
 func main() {
 	//initialize logging
 	//	ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102_150405"))
-	ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102"))
-	os.Setenv("RLOG_LOG_FILE", filepath.Join("D:/archive/"+ologfileName+".log"))
+	/*
+		ologfileName := fmt.Sprintf("logparse_%s", time.Now().Format("20060102"))
+		os.Setenv("RLOG_LOG_FILE", filepath.Join("D:/archive/"+ologfileName+".log"))
+	*/
+	os.Setenv("RLOG_LOG_FILE", filepath.Join("D:/OVERNITE/GREYLIST/logparse.log"))
+
 	rlog.UpdateEnv()
 	rlog.Info(os.Args[0] + " started")
 
@@ -156,38 +160,38 @@ func main() {
 	var user string = "sb"
 	var pwd string = "12345"
 
-	rlog.Info("connect to database started")
+	rlog.Debug("connect to database started")
 	con, err := sql.Open("mymysql", server+"*"+database+"/"+user+"/"+pwd)
 	if err != nil {
 		rlog.Error(fmt.Sprintf("Unable to connect to Database [%s], [%s], [%s]\r\n", database, user, err))
 		os.Exit(1)
 	}
 	defer con.Close()
-	rlog.Info("connection to database established")
+	rlog.Debug("connection to database established")
 
 	lastTime := loadConfig()
 	potentialNewIP := false
 
 	//prepare statements:
-	rlog.Info("prepare insqry")
+	rlog.Debug("prepare insqry")
 	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode, countryname, latitude, longitude, qty) values (?, ?, ?, ?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + ?")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
 		os.Exit(1)
 	}
 	defer insqry.Close()
-	rlog.Info("insqry prepared")
+	rlog.Debug("insqry prepared")
 
-	rlog.Info("prepare ins2cleanitqry")
+	rlog.Debug("prepare ins2cleanitqry")
 	ins2cleanitqry, err := con.Prepare("insert ignore into cleanit (tag, value) values (?, ?)")
 	if err != nil {
 		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
 		os.Exit(1)
 	}
 	defer ins2cleanitqry.Close()
-	rlog.Info("ins2cleanitqry prepared")
+	rlog.Debug("ins2cleanitqry prepared")
 
-	rlog.Info("prepare selectIP")
+	rlog.Debug("prepare selectIP")
 	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=30")
 
 	if err != nil {
@@ -195,7 +199,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer selectIP.Close()
-	rlog.Info("selectIP prepared")
+	rlog.Debug("selectIP prepared")
 
 	fileName := filepath.Join("./" + fmt.Sprintf("SMTP-Activity-%s.log", time.Now().Format("060102")))
 	rlog.Info("parsing " + fileName)
@@ -235,7 +239,7 @@ func main() {
 
 		//if located and not safe....
 
-		rlog.Info("map.ipInfo ==> mysql.collected")
+		rlog.Debug("map.ipInfo ==> mysql.collected")
 		for i, j := range ipInfo {
 			i.ConfirmBlock()
 			if i.Block {
@@ -258,7 +262,7 @@ func main() {
 			}
 		}
 
-		rlog.Info("map.ipInfo ==> mysql.cleanit")
+		rlog.Debug("map.ipInfo ==> mysql.cleanit")
 
 		for i, _ := range ipInfo {
 			_, err := ins2cleanitqry.Exec("IP", modifyIP(i.IP, false))
@@ -270,14 +274,14 @@ func main() {
 		}
 
 		if potentialNewIP {
-			rlog.Info("mysql.collected ==> map.collectedIPs")
+			rlog.Debug("mysql.collected ==> map.collectedIPs")
 			exportCollectedIPs(selectIP, collectedIPs)
 
-			rlog.Info("map.collectedIPs ==> moe.smtp-deny")
+			rlog.Debug("map.collectedIPs ==> moe.smtp-deny")
 			outputFileName := filepath.Join("\\\\moe\\c\\Program Files (x86)\\Mail Enable\\Config\\SMTP-DENY.TAB")
 			exportToFile(outputFileName, collectedIPs)
 
-			rlog.Info("map.collectedIPs ==> file.archive")
+			rlog.Debug("map.collectedIPs ==> file.archive")
 			outputFileName = fmt.Sprintf("SMTP-DENY_%s", time.Now().Format("20060102_150405"))
 			outputFileName = filepath.Join("\\\\moe\\d\\archive\\" + outputFileName + ".tab")
 			exportToFile(outputFileName, collectedIPs)
