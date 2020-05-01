@@ -78,7 +78,6 @@ func (g *GeoIPData) ConfirmBlock() {
 	whitelistedISP = append(whitelistedISP,
 		"amazon",
 		"twitter",
-		"digital ocean",
 		"google",
 	)
 
