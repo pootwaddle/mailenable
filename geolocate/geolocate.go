@@ -81,10 +81,24 @@ func (g *GeoIPData) ConfirmBlock() {
 		"google",
 	)
 
+	var blacklistedISP []string
+	blacklistedISP = append(blacklistedISP,
+		"digital ocean",
+		"digitalocean",
+		"ocean",
+	)
+
 	for _, x := range whitelistedISP {
 		if strings.HasPrefix(strings.ToLower(g.ISP), x) {
 			g.Block = false
 			rlog.Info(fmt.Sprintf("WhitelistedISP Exception for ISP %s", g.ISP))
+		}
+	}
+
+	for _, x := range blacklistedISP {
+		if strings.HasPrefix(strings.ToLower(g.ISP), x) {
+			g.Block = true
+			rlog.Info(fmt.Sprintf("BlacklistedISP -- ISP %s", g.ISP))
 		}
 	}
 
