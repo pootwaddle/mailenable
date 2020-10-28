@@ -52,15 +52,15 @@ func createFileFromMap(m map[string]int, fn string, h string) {
 	}
 
 	OFileW := bufio.NewWriter(OFile)
-	if h != "" {
-		OFileW.WriteString(h + "\r\n")
-	}
-
 	//sort our map by values (descending)
 	sorted := sortMapByValue(m)
 
 	for x := range sorted {
-		OFileW.WriteString(fmt.Sprintf("%s, %d\r\n", sorted[x].Key, sorted[x].Value))
+		if h != "" {
+			OFileW.WriteString(fmt.Sprintf("%s,%s\r\n", h, sorted[x].Key))
+		} else {
+			OFileW.WriteString(fmt.Sprintf("%s,\t%d\r\n", sorted[x].Key, sorted[x].Value))
+		}
 	}
 
 	OFileW.Flush()
@@ -148,9 +148,9 @@ func main() {
 	}
 
 	createFileFromMap(filenameCount, "filenameCount.csv", "")
-	createFileFromMap(ipCount, "IPCount.csv", "")
+	createFileFromMap(ipCount, "IPCount.csv", "IP")
 	createFileFromMap(senderEmailCount, "senderEmailCount.csv", "")
-	createFileFromMap(domainCount, "domainCount.csv", "")
+	createFileFromMap(domainCount, "domainCount.csv", "DOMAIN")
 	createFileFromMap(tldCount, "TLDCount.csv", "")
 	createFileFromMap(fileTrailCount, "filetrailCount.csv", "")
 	createFileFromMap(trailCount, "trailCount.csv", "")
