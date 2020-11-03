@@ -179,7 +179,16 @@ func (g *GreyRec) CheckHAMdom(scrub *Scrubbers) {
 }
 
 func (g *GreyRec) CheckException(scrub *Scrubbers) {
-	//in our Exception map?  this is an email Sender that we want to allow
+	//in our Exception map?  this is an email Sender -- Phrase in the email as of 2020/11/02 that we want to allow
+
+	for key, _ := range scrub.Exceptions {
+		if strings.Contains(g.SenderEmail, key) {
+			g.Exception = true
+			g.Exceptions = append(g.Exceptions, "PHRASE in EMAIL")
+			fmt.Printf("Email Contains Exception Phrase: %s\n", key)
+		}
+	}
+
 	if scrub.Exceptions[g.SenderEmail] != 0 {
 		g.Exception = true
 		g.Exceptions = append(g.Exceptions, "EMAIL")

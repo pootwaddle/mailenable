@@ -56,9 +56,12 @@ func createFileFromMap(m map[string]int, fn string, h string) {
 	sorted := sortMapByValue(m)
 
 	for x := range sorted {
-		if h != "" {
+		switch h {
+		case "CIDR":
+			OFileW.WriteString(fmt.Sprintf("%s.0/24\r\n", sorted[x].Key))
+		case "IP", "DOMAIN":
 			OFileW.WriteString(fmt.Sprintf("%s,%s\r\n", h, sorted[x].Key))
-		} else {
+		default:
 			OFileW.WriteString(fmt.Sprintf("%s,\t%d\r\n", sorted[x].Key, sorted[x].Value))
 		}
 	}
@@ -148,13 +151,14 @@ func main() {
 	}
 
 	createFileFromMap(filenameCount, "filenameCount.csv", "")
-	createFileFromMap(ipCount, "IPCount.csv", "IP")
 	createFileFromMap(senderEmailCount, "senderEmailCount.csv", "")
-	createFileFromMap(domainCount, "domainCount.csv", "DOMAIN")
 	createFileFromMap(tldCount, "TLDCount.csv", "")
 	createFileFromMap(fileTrailCount, "filetrailCount.csv", "")
 	createFileFromMap(trailCount, "trailCount.csv", "")
 	createFileFromMap(reasonCount, "reasonCount.csv", "")
 	createFileFromMap(spamReview, "spamReview.csv", "")
+	createFileFromMap(ipCount, "IPCount.csv", "IP")
+	createFileFromMap(ipCount, "IPBlocks.csv", "CIDR")
+	createFileFromMap(domainCount, "domainCount.csv", "DOMAIN")
 	createGeoFileFromMap(ipGeoCount, "IP Geo.csv")
 }
