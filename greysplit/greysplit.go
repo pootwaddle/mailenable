@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"_library/wbj"
 )
 
 func loadCSVfile(iFilename string) ([][]string, error) {
@@ -70,8 +68,34 @@ func CreateFile(oFilename string) error {
 	return nil
 }
 
+//CheckCommandLine helps qualify the inbound arguments from
+//the DOS command line.  It holds the number of expected arguments
+//and if there aren't enough it displays a reminder of what
+//arguments are expected for the program calling this.
+func CheckCommandLine(expected int, usage string) int {
+
+	if len(os.Args) < expected {
+		fmt.Fprintf(os.Stderr, "Too Few Arguments\r\n")
+		fmt.Fprintf(os.Stderr, "Expecting: %s %s\r\n", os.Args[0], usage)
+		return 1
+	}
+
+	finfo, err := os.Stat(os.Args[1]) //by convention, Args[1] will be input filename
+	if err != nil {
+		// no such file or dir
+		fmt.Fprintf(os.Stderr, "%s Not Found\r\n", os.Args[1])
+		return 1
+	}
+	if finfo.IsDir() {
+		// it's a Directory
+		fmt.Fprintf(os.Stderr, "%s Is Not A File\r\n", os.Args[1])
+		return 1
+	}
+	return 0
+} // end CheckCommandLine
+
 func main() {
-	if wbj.CheckCommandLine(2, "inputfile") != 0 {
+	if CheckCommandLine(2, "inputfile") != 0 {
 		return
 	}
 
@@ -115,5 +139,5 @@ func main() {
 		}
 
 	}
-	fmt.Printf(fmt.Sprintf("\nDone. Processed %d records.\n", recordCount))
+	fmt.Printf("\nDone. Processed %d records.\n", recordCount)
 }
