@@ -1,4 +1,4 @@
-module scrubbing
+module github.com/pootwaddle/mailenable/scrubbing
 
 go 1.16
 

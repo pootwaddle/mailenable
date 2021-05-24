@@ -33,7 +33,7 @@ import (
 	"strings"
 	"time"
 
-	"mailenable/scrubbing"
+	"github.com/pootwaddle/mailenable/scrubbing"
 )
 
 func main() {
