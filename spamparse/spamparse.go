@@ -13,8 +13,8 @@ import (
 	"sort"
 	"strings"
 
-	"mailenable/geolocate"
-	"mailenable/scrubbing"
+	"github.com/pootwaddle/mailenable/geolocate"
+	"github.com/pootwaddle/mailenable/scrubbing"
 )
 
 // A data structure to hold a key/value pair.

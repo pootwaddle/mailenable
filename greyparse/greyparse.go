@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	"mailenable/scrubbing"
+	"github.com/pootwaddle/mailenable/scrubbing"
 )
 
 // A data structure to hold a key/value pair.
