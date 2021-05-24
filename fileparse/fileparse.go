@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"mailenable/geolocate"
+	"github.com/pootwaddle/mailenable/geolocate"
 
 	"github.com/romana/rlog"
 	_ "github.com/ziutek/mymysql/godrv"
