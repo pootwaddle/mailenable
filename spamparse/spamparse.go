@@ -114,6 +114,8 @@ func main() {
 	fmt.Printf("EXCEPT map contains %d entries\r\n", len(scrub.Exceptions))
 	fmt.Printf("PHRASES  map contains %d entries\r\n", len(scrub.PhrasesMap))
 	fmt.Printf("PHRASES array contains %d entries\r\n\r\n", len(scrub.Phrases))
+	fmt.Printf("KILL  map contains %d entries\r\n", len(scrub.KillsMap))
+	fmt.Printf("KILL array contains %d entries\r\n\r\n", len(scrub.Kills))
 	fmt.Printf("Initializing...Done\r\n")
 
 	files, err := ioutil.ReadDir(".")
