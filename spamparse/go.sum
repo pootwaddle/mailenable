@@ -6,5 +6,7 @@ github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210524205010-92d5d091c6b2 h1
 github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210524205010-92d5d091c6b2/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
 github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526033625-33e1d86bec20 h1:Qt+NYQxAfMS7UgZAqEVE8bTCFHG8bTlLJABGbuF+9lQ=
 github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526033625-33e1d86bec20/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
+github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526040645-7a330e483a86 h1:vp0f+qUQJNPnDhzqc6/GDU4jUmqLKKtNVqEicZ7UgdQ=
+github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526040645-7a330e483a86/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 h1:jkvpcEatpwuMF5O5LVxTnehj6YZ/aEZN4NWD/Xml4pI=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7/go.mod h1:KTrHyWpO1sevuXPZwyeZc72ddWRFqNSKDFl7uVWKpg0=
