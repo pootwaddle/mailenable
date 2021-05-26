@@ -98,21 +98,6 @@ func (s *Scrubbers) loadMaps() {
 		}
 	}
 
-	func (s *Scrubbers) MapList() {
-		fmt.Printf("HAMDOM   map contains %d entries\r\n", len(s.Hamdoms))
-		fmt.Printf("SENDER   map contains %d entries\r\n", len(s.Senders))
-		fmt.Printf("DOMAINS  map contains %d entries\r\n", len(s.Domains))
-		fmt.Printf("TLD      map contains %d entries\r\n", len(s.TLDs))
-		fmt.Printf("IPS      map contains %d entries\r\n", len(s.IPs))
-		fmt.Printf("RECIP    map contains %d entries\r\n", len(s.Recipients))
-		fmt.Printf("EXCEPT   map contains %d entries\r\n", len(s.Exceptions))
-		fmt.Printf("PHRASES  map contains %d entries\r\n", len(s.PhrasesMap))
-		fmt.Printf("PHRASES  array contains %d entries\r\n", len(s.Phrases))
-		fmt.Printf("KILL     map contains %d entries\r\n", len(s.PhrasesMap))
-		fmt.Printf("KILL     array contains %d entries\r\n\r\n", len(s.Phrases))
-
-	}
-
 	for k, _ := range s.PhrasesMap {
 		s.Phrases = append(s.Phrases, k) //Phrases is slice, not a map...
 	}
@@ -120,6 +105,20 @@ func (s *Scrubbers) loadMaps() {
 	for k, _ := range s.KillsMap {
 		s.Kills = append(s.Kills, k) //Kills is slice, not a map...
 	}
+}
+
+func (s *Scrubbers) MapList() {
+	fmt.Printf("HAMDOM   map contains %d entries\r\n", len(s.Hamdoms))
+	fmt.Printf("SENDER   map contains %d entries\r\n", len(s.Senders))
+	fmt.Printf("DOMAINS  map contains %d entries\r\n", len(s.Domains))
+	fmt.Printf("TLD      map contains %d entries\r\n", len(s.TLDs))
+	fmt.Printf("IPS      map contains %d entries\r\n", len(s.IPs))
+	fmt.Printf("RECIP    map contains %d entries\r\n", len(s.Recipients))
+	fmt.Printf("EXCEPT   map contains %d entries\r\n", len(s.Exceptions))
+	fmt.Printf("PHRASES  map contains %d entries\r\n", len(s.PhrasesMap))
+	fmt.Printf("PHRASES  array contains %d entries\r\n", len(s.Phrases))
+	fmt.Printf("KILL     map contains %d entries\r\n", len(s.PhrasesMap))
+	fmt.Printf("KILL     array contains %d entries\r\n\r\n", len(s.Phrases))
 
 }
 
