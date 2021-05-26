@@ -1,6 +1,4 @@
 github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi/U=
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
-github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210524210658-0043845e6ed0 h1:0ecHsLsb8bvFnrcJSslupE6WkUPZ/FY9Z/YOR4t99nI=
-github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210524210658-0043845e6ed0/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
-github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526032326-0886ee2e72cb h1:bGb/noC549opb86168bf91XhffipV4FMfzZED2XMJo4=
-github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526032326-0886ee2e72cb/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
+github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526033625-33e1d86bec20 h1:Qt+NYQxAfMS7UgZAqEVE8bTCFHG8bTlLJABGbuF+9lQ=
+github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210526033625-33e1d86bec20/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
