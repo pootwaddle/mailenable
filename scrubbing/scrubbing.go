@@ -119,7 +119,6 @@ func (s *Scrubbers) MapList() {
 	fmt.Printf("PHRASES  array contains %d entries\r\n", len(s.Phrases))
 	fmt.Printf("KILL     map contains %d entries\r\n", len(s.PhrasesMap))
 	fmt.Printf("KILL     array contains %d entries\r\n\r\n", len(s.Phrases))
-
 }
 
 const (
