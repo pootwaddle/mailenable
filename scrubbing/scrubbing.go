@@ -91,11 +91,26 @@ func (s *Scrubbers) loadMaps() {
 			s.Exceptions[y[1]]++
 		case "PHRASES":
 			s.PhrasesMap[y[1]]++
-		case "KILLS":
+		case "KILL":
 			s.KillsMap[y[1]]++
 		default:
 			fmt.Println(fmt.Sprintf("%s doesn't match (%s)", y[0], y[1]))
 		}
+	}
+
+	func (s *Scrubbers) MapList() {
+		fmt.Printf("HAMDOM   map contains %d entries\r\n", len(s.Hamdoms))
+		fmt.Printf("SENDER   map contains %d entries\r\n", len(s.Senders))
+		fmt.Printf("DOMAINS  map contains %d entries\r\n", len(s.Domains))
+		fmt.Printf("TLD      map contains %d entries\r\n", len(s.TLDs))
+		fmt.Printf("IPS      map contains %d entries\r\n", len(s.IPs))
+		fmt.Printf("RECIP    map contains %d entries\r\n", len(s.Recipients))
+		fmt.Printf("EXCEPT   map contains %d entries\r\n", len(s.Exceptions))
+		fmt.Printf("PHRASES  map contains %d entries\r\n", len(s.PhrasesMap))
+		fmt.Printf("PHRASES  array contains %d entries\r\n", len(s.Phrases))
+		fmt.Printf("KILL     map contains %d entries\r\n", len(s.PhrasesMap))
+		fmt.Printf("KILL     array contains %d entries\r\n\r\n", len(s.Phrases))
+
 	}
 
 	for k, _ := range s.PhrasesMap {
