@@ -209,10 +209,8 @@ func (g *GreyRec) CheckHamSuffix(scrub *Scrubbers) {
 	for key := range scrub.HamSuffix {
 		if strings.HasSuffix(g.Domain, key) {
 			g.Exception = true
-			g.Exception = true
 			g.Exceptions = append(g.Exceptions, "SUFFIX")
-			fmt.Printf("SUFFIX: %s\n", g.Domain)
-			break
+			fmt.Printf("SUFFIX: %s\n", key)
 		}
 	}
 }
