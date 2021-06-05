@@ -206,7 +206,7 @@ func (g *GreyRec) CheckHAMdom(scrub *Scrubbers) {
 
 func (g *GreyRec) CheckHamSuffix(scrub *Scrubbers) {
 	//is the suffix in our suffix map? then mark this as an Exception to all the other rules, except Recipient and Kill
-	for key := range scrub.Exceptions {
+	for key := range scrub.HamSuffix {
 		if strings.HasSuffix(g.Domain, key) {
 			g.Exception = true
 			g.Exception = true
