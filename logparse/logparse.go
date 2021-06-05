@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pootwaddle/mailenable/geolocate"
+	"github.com/pootwaddle/geolocate"
 
 	"github.com/romana/rlog"
 	_ "github.com/ziutek/mymysql/godrv"

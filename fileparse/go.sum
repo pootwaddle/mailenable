@@ -1,5 +1,5 @@
-github.com/pootwaddle/mailenable/geolocate v0.0.0-20210524202302-ead11259fde0 h1:DgaOZcymqkKAPocOUO8907JqS8zsLRSQjeMEXQpwl1U=
-github.com/pootwaddle/mailenable/geolocate v0.0.0-20210524202302-ead11259fde0/go.mod h1:GSOmresprTPf6uvFKChHQ5mjAsFixV1eY0vpY9UImqY=
+github.com/pootwaddle/geolocate v0.2.1 h1:NuDrP/vsoNqeEGvX1CDXgC+zygUUfLAR+wo3ojDwQxQ=
+github.com/pootwaddle/geolocate v0.2.1/go.mod h1:UGG5QNX2Rw0vhKLjlyyR44vCOAf+jpbT/RArmdRA4ps=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 h1:jkvpcEatpwuMF5O5LVxTnehj6YZ/aEZN4NWD/Xml4pI=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7/go.mod h1:KTrHyWpO1sevuXPZwyeZc72ddWRFqNSKDFl7uVWKpg0=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
