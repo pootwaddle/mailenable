@@ -18,6 +18,7 @@ type Scrubbers struct {
 	Domains    map[string]int
 	Senders    map[string]int
 	Hamdoms    map[string]int
+	HamSuffix  map[string]int
 	IPs        map[string]int
 	Exceptions map[string]int
 	PhrasesMap map[string]int
@@ -68,6 +69,7 @@ func (s *Scrubbers) loadMaps() {
 	s.Senders = make(map[string]int)
 	s.Domains = make(map[string]int)
 	s.Hamdoms = make(map[string]int)
+	s.HamSuffix = make(map[string]int)
 	s.Exceptions = make(map[string]int)
 	s.PhrasesMap = make(map[string]int)
 	s.KillsMap = make(map[string]int)
@@ -87,6 +89,8 @@ func (s *Scrubbers) loadMaps() {
 			s.Domains[y[1]]++
 		case "HAMDOM":
 			s.Hamdoms[y[1]]++
+		case "SUFFIX":
+			s.HamSuffix[y[1]]++
 		case "EXCEPT":
 			s.Exceptions[y[1]]++
 		case "PHRASES":
@@ -94,21 +98,22 @@ func (s *Scrubbers) loadMaps() {
 		case "KILL":
 			s.KillsMap[y[1]]++
 		default:
-			fmt.Println(fmt.Sprintf("%s doesn't match (%s)", y[0], y[1]))
+			fmt.Printf("%s doesn't match (%s)\n", y[0], y[1])
 		}
 	}
 
-	for k, _ := range s.PhrasesMap {
+	for k := range s.PhrasesMap {
 		s.Phrases = append(s.Phrases, k) //Phrases is slice, not a map...
 	}
 
-	for k, _ := range s.KillsMap {
+	for k := range s.KillsMap {
 		s.Kills = append(s.Kills, k) //Kills is slice, not a map...
 	}
 }
 
 func (s *Scrubbers) MapList() {
 	fmt.Printf("HAMDOM   map contains %d entries\r\n", len(s.Hamdoms))
+	fmt.Printf("SUFFIX   map contains %d entries\r\n", len(s.HamSuffix))
 	fmt.Printf("SENDER   map contains %d entries\r\n", len(s.Senders))
 	fmt.Printf("DOMAINS  map contains %d entries\r\n", len(s.Domains))
 	fmt.Printf("TLD      map contains %d entries\r\n", len(s.TLDs))
@@ -160,7 +165,7 @@ func (g *GreyRec) SplitRecord() {
 	g.SenderEmail = strings.Trim(parts[1], " ")
 	g.Recipient = strings.Trim(parts[2], " ")
 
-	if len(g.Recipient) > 4 && strings.Index(g.Recipient, ".tab") >= 0 {
+	if len(g.Recipient) > 4 && strings.Contains(g.Recipient, ".tab") {
 		g.Recipient = g.Recipient[:strings.Index(g.Recipient, ".tab")] //Recipient is the 3rd part of the file name, includes .tab
 	}
 
@@ -173,8 +178,9 @@ func (g *GreyRec) SplitRecord() {
 func (g *GreyRec) ScrubRecord(scrub *Scrubbers) {
 	g.Exception = false
 
-	// check our Exceptions -- these 3 calls are order-dependent
+	// check our Exceptions -- these 4 calls are order-dependent
 	g.CheckHAMdom(scrub)
+	g.CheckHamSuffix(scrub)
 	g.CheckKill(scrub)
 	g.CheckException(scrub)
 
@@ -198,9 +204,22 @@ func (g *GreyRec) CheckHAMdom(scrub *Scrubbers) {
 	}
 }
 
+func (g *GreyRec) CheckHamSuffix(scrub *Scrubbers) {
+	//is the suffix in our suffix map? then mark this as an Exception to all the other rules, except Recipient and Kill
+	for key := range scrub.Exceptions {
+		if strings.HasSuffix(g.Domain, key) {
+			g.Exception = true
+			g.Exception = true
+			g.Exceptions = append(g.Exceptions, "SUFFIX")
+			fmt.Printf("SUFFIX: %s\n", g.Domain)
+			break
+		}
+	}
+}
+
 func (g *GreyRec) CheckException(scrub *Scrubbers) {
 	//in our Exception map?  this is a Phrase in the sender email as of 2020/11/02 that we want to allow
-	for key, _ := range scrub.Exceptions {
+	for key := range scrub.Exceptions {
 		if strings.Contains(g.SenderEmail, key) {
 			g.Exception = true
 			g.Exceptions = append(g.Exceptions, "EXCEPT")
@@ -211,6 +230,7 @@ func (g *GreyRec) CheckException(scrub *Scrubbers) {
 
 func (g *GreyRec) CheckKill(scrub *Scrubbers) {
 	//we should kill any record with these phrases in the sender email unless in the EXCEPT map of sender emails
+	//added to try to catch spam from gmail.com (which is in)
 	for _, val := range scrub.Kills {
 		if strings.Contains(g.SenderEmail, val) {
 			fmt.Printf("KILL: %s\n", val)

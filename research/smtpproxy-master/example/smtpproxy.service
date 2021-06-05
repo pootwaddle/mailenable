@@ -1,7 +1,0 @@
-[Unit]
-Description=SMTP Proxy
-
-[Service]
-EnvironmentFile=-/etc/default/smtpproxy
-ExecStart=/usr/local/sbin/smtpproxy
-User=nobody
