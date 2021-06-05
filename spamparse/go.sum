@@ -2,7 +2,7 @@ github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
 github.com/pootwaddle/mailenable/geolocate v0.0.0-20210524205010-92d5d091c6b2 h1:yKbcWERx5klfPhMT7+BH9YHLnSPJFArcaHouTLIqqVs=
 github.com/pootwaddle/mailenable/geolocate v0.0.0-20210524205010-92d5d091c6b2/go.mod h1:GSOmresprTPf6uvFKChHQ5mjAsFixV1eY0vpY9UImqY=
-github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210605022623-e715caf238e0 h1:A1Y+uYZohJ08YsQIYoc9ieiM2TpWuxrwsEgCPEGS6+Q=
-github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210605022623-e715caf238e0/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
+github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210605024429-351ee46e61bd h1:XWeBZOs+nH2ZmD3CjbUGT2HIvJGeTNcOstfcYKlA5ao=
+github.com/pootwaddle/mailenable/scrubbing v0.0.0-20210605024429-351ee46e61bd/go.mod h1:Ch+4wzM3ONRnr61XnguJlVO59DDbwFV1i2sYI9MQmbg=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 h1:jkvpcEatpwuMF5O5LVxTnehj6YZ/aEZN4NWD/Xml4pI=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7/go.mod h1:KTrHyWpO1sevuXPZwyeZc72ddWRFqNSKDFl7uVWKpg0=
