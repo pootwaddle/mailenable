@@ -1,4 +1,4 @@
 github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi/U=
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
-github.com/pootwaddle/scrubbing v0.2.1 h1:IEZDZMdboFIaQQlx4vO5w0SDS9k4v8Yi/D6A6HqMByk=
-github.com/pootwaddle/scrubbing v0.2.1/go.mod h1:M3OrRZrvH6HqUaaIXAGP77lduHYZMJ7iiIuSREEj6nk=
+github.com/pootwaddle/scrubbing v0.2.2 h1:E77ndkvxLHB0lMgLi3g1ORyMGCXGrAJC03bZ07FoZ2E=
+github.com/pootwaddle/scrubbing v0.2.2/go.mod h1:M3OrRZrvH6HqUaaIXAGP77lduHYZMJ7iiIuSREEj6nk=

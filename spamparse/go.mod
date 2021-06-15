@@ -4,5 +4,5 @@ go 1.16
 
 require (
 	github.com/pootwaddle/geolocate v0.2.1
-	github.com/pootwaddle/scrubbing v0.2.1
+	github.com/pootwaddle/scrubbing v0.2.2
 )

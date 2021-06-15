@@ -79,7 +79,7 @@ func createGeoFileFromMap(m map[string]int, fn string) {
 
 	OFileW := bufio.NewWriter(OFile)
 
-	for k, _ := range m {
+	for k := range m {
 		geo := geolocate.GetGeoData(k + ".112")
 		OFileW.WriteString(fmt.Sprintf("%s: %s  %s  %s  %s \r\n", k, geo.ISP, geo.City, geo.CountryCode, geo.CountryName))
 	}
@@ -90,16 +90,17 @@ func createGeoFileFromMap(m map[string]int, fn string) {
 
 func main() {
 	var (
-		filenameCount    = make(map[string]int)
-		ipCount          = make(map[string]int)
-		senderEmailCount = make(map[string]int)
-		domainCount      = make(map[string]int)
-		tldCount         = make(map[string]int)
-		fileTrailCount   = make(map[string]int)
-		trailCount       = make(map[string]int)
-		reasonCount      = make(map[string]int)
-		spamReview       = make(map[string]int)
-		ipGeoCount       = make(map[string]int)
+		filenameCount      = make(map[string]int)
+		ipCount            = make(map[string]int)
+		senderEmailCount   = make(map[string]int)
+		reversedEmailCount = make(map[string]int)
+		domainCount        = make(map[string]int)
+		tldCount           = make(map[string]int)
+		fileTrailCount     = make(map[string]int)
+		trailCount         = make(map[string]int)
+		reasonCount        = make(map[string]int)
+		spamReview         = make(map[string]int)
+		ipGeoCount         = make(map[string]int)
 	)
 
 	fmt.Printf("\nInitializing...\n")
@@ -114,7 +115,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	for x, _ := range files {
+	for x := range files {
 		if strings.Contains(files[x].Name(), ".spm") {
 			fmt.Println(files[x].Name())
 
@@ -129,6 +130,7 @@ func main() {
 			ipCount[greyRecord.IP]++
 			ipGeoCount[greyRecord.IP]++
 			senderEmailCount[greyRecord.SenderEmail]++
+			reversedEmailCount[greyRecord.SenderEmailReversed]++
 			domainCount[greyRecord.Domain]++
 			tldCount[greyRecord.TLD]++
 			fileTrailCount[greyRecord.Trail+" ==> "+greyRecord.Filename[:strings.Index(greyRecord.Filename, ".tab")]]++
@@ -144,6 +146,7 @@ func main() {
 
 	createFileFromMap(filenameCount, "filenameCount.csv", "")
 	createFileFromMap(senderEmailCount, "senderEmailCount.csv", "")
+	createFileFromMap(reversedEmailCount, "reversedEmailCount.csv", "EMAIL")
 	createFileFromMap(tldCount, "TLDCount.csv", "")
 	createFileFromMap(fileTrailCount, "filetrailCount.csv", "")
 	createFileFromMap(trailCount, "trailCount.csv", "")
