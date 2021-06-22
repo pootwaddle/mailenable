@@ -45,7 +45,7 @@ func writeConfig(count int) {
 	}
 	defer file.Close()
 
-	fmt.Fprintf(file, fmt.Sprintf("%d", count))
+	fmt.Fprintf(file, "%d", count)
 }
 
 func loadFile(fileName string) [][]string {
@@ -54,7 +54,7 @@ func loadFile(fileName string) [][]string {
 
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		rlog.Error("loadFile ReadFile error - " + fileName)
+		rlog.Errorf("loadFile ReadFile error - %s", fileName)
 		os.Exit(1)
 	}
 
@@ -84,7 +84,7 @@ func exportCollectedIPs(selectIP *sql.Stmt, ipMap map[string]int) {
 
 	rows, err := selectIP.Query()
 	if err != nil {
-		rlog.Error(fmt.Sprintf("selectIP failed: %s", err))
+		rlog.Errorf("selectIP failed: %s", err)
 	} else {
 		//rows is *Rows
 		defer rows.Close()
@@ -103,7 +103,7 @@ func exportCollectedIPs(selectIP *sql.Stmt, ipMap map[string]int) {
 			ipMap[newIP]++
 		}
 	}
-	rlog.Info(fmt.Sprintf("We have collected %d unique IP blocks", len(ipMap)))
+	rlog.Infof("We have collected %d unique IP blocks", len(ipMap))
 }
 
 func modifyIP(origIP string, addwildcard bool) string {
@@ -128,13 +128,13 @@ func exportToFile(filepath string, collection map[string]int) {
 
 	file, err := os.Create(filepath)
 	if err != nil {
-		rlog.Error(fmt.Sprintf("Cannot create file %s %s", filepath, err))
+		rlog.Errorf("Cannot create file %s %s", filepath, err)
 		os.Exit(1)
 	}
 	defer file.Close()
 
-	for i, _ := range collection {
-		fmt.Fprintf(file, fmt.Sprintf("%s\t1\tCONNECT\tSYSTEM\r\n", i))
+	for i := range collection {
+		fmt.Fprintf(file, "%s\t1\tCONNECT\tSYSTEM\r\n", i)
 	}
 }
 
@@ -163,7 +163,7 @@ func main() {
 	rlog.Debug("connect to database started")
 	con, err := sql.Open("mymysql", server+"*"+database+"/"+user+"/"+pwd)
 	if err != nil {
-		rlog.Error(fmt.Sprintf("Unable to connect to Database [%s], [%s], [%s]\r\n", database, user, err))
+		rlog.Errorf("Unable to connect to Database [%s], [%s], [%s]\r\n", database, user, err)
 		os.Exit(1)
 	}
 	defer con.Close()
@@ -176,16 +176,16 @@ func main() {
 	rlog.Debug("prepare insqry")
 	insqry, err := con.Prepare("insert ignore into collected (ip, host, isp, city, countrycode, countryname, latitude, longitude, qty) values (?, ?, ?, ?,?,?,?,?,?)  ON DUPLICATE KEY UPDATE qty = qty + ?")
 	if err != nil {
-		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
+		rlog.Errorf("[%s], [%s], [%s]", database, user, err)
 		os.Exit(1)
 	}
 	defer insqry.Close()
-	rlog.Debug("insqry prepared")
+	rlog.Debug("inquiry prepared")
 
 	rlog.Debug("prepare ins2cleanitqry")
 	ins2cleanitqry, err := con.Prepare("insert ignore into cleanit (tag, value) values (?, ?)")
 	if err != nil {
-		rlog.Error(fmt.Sprintf("[%s], [%s], [%s]", database, user, err))
+		rlog.Errorf("[%s], [%s], [%s]", database, user, err)
 		os.Exit(1)
 	}
 	defer ins2cleanitqry.Close()
@@ -195,7 +195,7 @@ func main() {
 	selectIP, err := con.Prepare("Select ip from collected where (TIMESTAMPDIFF(DAY,seen,now())) <=30")
 
 	if err != nil {
-		rlog.Error(fmt.Sprintf("Error creating selectIP, [%s]", err))
+		rlog.Errorf("Error creating selectIP, [%s]", err)
 		os.Exit(1)
 	}
 	defer selectIP.Close()
@@ -205,8 +205,8 @@ func main() {
 	rlog.Info("parsing " + fileName)
 
 	lineArray := loadFile(fileName)
-	rlog.Info(fmt.Sprintf("%d lines from %s", len(lineArray), fileName))
-	rlog.Info(fmt.Sprintf("%d last time", lastTime))
+	rlog.Infof("%d lines from %s", len(lineArray), fileName)
+	rlog.Infof("%d last time", lastTime)
 
 	if lastTime > len(lineArray) {
 		rlog.Info("resetting our pointer")
@@ -217,18 +217,28 @@ func main() {
 
 	for x := lastTime; x < len(lineArray); x++ {
 		y := lineArray[x]
+		// AUTH
+		if y[5] == "AUTH LOGIN" {
+			rlog.Info("AUTH LOGIN - " + y[4] + " " + y[5] + y[6])
+			geo.IsAuth = true
+			geo = geolocate.GetGeoData(y[4])
+			rlog.Infof("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3])
+			ipInfo[*geo]++
+			potentialNewIP = true
+
+		}
 		// EHLO or HELO
 		if (y[5] == "HELO") || (y[5] == "EHLO") {
 			rlog.Info("Checking HELO - " + y[4] + " " + y[5] + y[6])
 			geo = geolocate.GetGeoData(y[4])
-			rlog.Info(fmt.Sprintf("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3]))
+			rlog.Infof("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3])
 			ipInfo[*geo]++
 			potentialNewIP = true
 		} else if len(y[7]) > 3 {
 			if y[7][0:1] == "5" {
 				geo.Code = y[7][0:3]
 				geo = geolocate.GetGeoData(y[4])
-				rlog.Info(fmt.Sprintf("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3]))
+				rlog.Infof("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3])
 				ipInfo[*geo]++
 				potentialNewIP = true
 			}
@@ -243,7 +253,7 @@ func main() {
 		for i, j := range ipInfo {
 			i.ConfirmBlock()
 			if i.Block {
-				rlog.Info(fmt.Sprintf("Inserting %s %s %s", i.IP, i.CountryCode, i.ISP))
+				rlog.Infof("Inserting %s %s %s", i.IP, i.CountryCode, i.ISP)
 				_, err := insqry.Exec(i.IP,
 					i.Host,
 					i.ISP,
@@ -256,7 +266,7 @@ func main() {
 					j,
 				)
 				if err != nil {
-					rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
+					rlog.Errorf("[%s], [%s], [%s]\r\n", database, user, err)
 					os.Exit(1)
 				}
 			}
@@ -264,10 +274,10 @@ func main() {
 
 		rlog.Debug("map.ipInfo ==> mysql.cleanit")
 
-		for i, _ := range ipInfo {
+		for i := range ipInfo {
 			_, err := ins2cleanitqry.Exec("IP", modifyIP(i.IP, false))
 			if err != nil {
-				rlog.Error(fmt.Sprintf("[%s], [%s], [%s]\r\n", database, user, err))
+				rlog.Errorf("[%s], [%s], [%s]\r\n", database, user, err)
 				os.Exit(1)
 			}
 
