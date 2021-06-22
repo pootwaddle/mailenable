@@ -1,7 +1,7 @@
 github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi/U=
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
-github.com/pootwaddle/geolocate v0.2.1 h1:NuDrP/vsoNqeEGvX1CDXgC+zygUUfLAR+wo3ojDwQxQ=
-github.com/pootwaddle/geolocate v0.2.1/go.mod h1:UGG5QNX2Rw0vhKLjlyyR44vCOAf+jpbT/RArmdRA4ps=
+github.com/pootwaddle/geolocate v0.2.2 h1:SykQamqRzCP7doap/Nylz9egD2r2JWLHvd5gGJF6I6Y=
+github.com/pootwaddle/geolocate v0.2.2/go.mod h1:UGG5QNX2Rw0vhKLjlyyR44vCOAf+jpbT/RArmdRA4ps=
 github.com/pootwaddle/scrubbing v0.2.2 h1:E77ndkvxLHB0lMgLi3g1ORyMGCXGrAJC03bZ07FoZ2E=
 github.com/pootwaddle/scrubbing v0.2.2/go.mod h1:M3OrRZrvH6HqUaaIXAGP77lduHYZMJ7iiIuSREEj6nk=
 github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 h1:jkvpcEatpwuMF5O5LVxTnehj6YZ/aEZN4NWD/Xml4pI=
