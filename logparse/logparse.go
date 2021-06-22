@@ -180,7 +180,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer insqry.Close()
-	rlog.Debug("inquiry prepared")
+	rlog.Debug("insqry prepared")
 
 	rlog.Debug("prepare ins2cleanitqry")
 	ins2cleanitqry, err := con.Prepare("insert ignore into cleanit (tag, value) values (?, ?)")
@@ -217,16 +217,6 @@ func main() {
 
 	for x := lastTime; x < len(lineArray); x++ {
 		y := lineArray[x]
-		// AUTH
-		if y[5] == "AUTH LOGIN" {
-			rlog.Info("AUTH LOGIN - " + y[4] + " " + y[5] + y[6])
-			geo.IsAuth = true
-			geo = geolocate.GetGeoData(y[4])
-			rlog.Infof("Line: %d  IP: %s  CountryCode: %s  %s", x, y[4], geo.CountryCode, y[7][:3])
-			ipInfo[*geo]++
-			potentialNewIP = true
-
-		}
 		// EHLO or HELO
 		if (y[5] == "HELO") || (y[5] == "EHLO") {
 			rlog.Info("Checking HELO - " + y[4] + " " + y[5] + y[6])
